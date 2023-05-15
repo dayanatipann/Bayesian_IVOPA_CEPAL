@@ -9,9 +9,9 @@ Imputación de viviendas ocupadas con personas ausentes, precenso y censo 2010.
 
 
 ## Estructura
-* dat : datos de entrada
-* out : resultados y gráficas
-* scr : código para replicar el análisis y las visualizaciones
+* `dat` : datos de entrada
+* `out` : resultados y gráficas
+* `scr` : código para replicar el análisis y las visualizaciones
 
 
 #### Bibliografía:
