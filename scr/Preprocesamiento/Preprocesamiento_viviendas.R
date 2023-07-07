@@ -24,6 +24,7 @@ library(readxl)
 library(dplyr)
 library(reshape2)
 library(sf) # abrir formato  gpkg
+library(DT) # tabla interactiva
 
 # setwd("D:/INEC/Proyectos/borrador_Bayesian_IVOPA_CEPAL")
 
@@ -100,16 +101,34 @@ sector_prov_pre <- sector_cen_pre[, .(tot_per_cen = sum(tot_per_cen),
                                       tot_per_prec = sum(tot_per_prec),
                                       tot_viv_prec = sum(tot_viv_prec)), by = c("id_prov", "dpa_despro")]
 
-# Tabulado a nivel de provincia para identificar diferencias
-sector_prov_pre_borr <- sector_cen_pre[, .(tot_per_cen = sum(tot_per_cen),
+# Tabulado a nivel de sector censal
+sector_pre_borr <- sector_cen_pre[, .(tot_per_cen = sum(tot_per_cen),
                                            tot_viv_cen = sum(tot_viv_cen),
                                            tot_per_prec = sum(tot_per_prec),
                                            tot_viv_prec = sum(tot_viv_prec)),
-                                       by = c("id_prov", "dpa_despro")][,
-                                       .(id_prov, dpa_despro, tot_per_cen, tot_per_prec, 
-                                         tot_per_por = (tot_per_cen / tot_per_prec)*100, 
+                                       "id_sector"][,
+                                       .(id_sector, tot_per_cen, tot_per_prec, 
+                                         tot_per_var = ((tot_per_cen - tot_per_prec)  / tot_per_prec), 
+                                         # var_per = ((tot_viv_cen / tot_viv_prec)-1)* 100,
                                          tot_viv_cen, tot_viv_prec,  
-                                         tot_viv_por = (tot_viv_cen / tot_viv_prec)*100)]
+                                         tot_viv_var = ((tot_viv_cen - tot_viv_prec) / tot_viv_prec))]
+
+# Tabula interactivo
+
+DT::datatable(sector_pre_borr, options = list(paging = FALSE, searching = FALSE, 
+                                  info = FALSE,
+                                  columnDefs = list(
+                                    list(className = "nowrap", targets = 0))
+), 
+rownames = FALSE) %>% 
+  formatRound(c('tot_per_cen', 'tot_per_prec', 'tot_per_var', 'tot_viv_cen', 'tot_viv_prec', 'tot_viv_var'), 2) %>% 
+  formatPercentage(c("tot_per_var", "tot_viv_var"), 2) %>%
+  formatStyle(
+    c("tot_per_var", "tot_viv_var"),
+    backgroundColor = styleInterval(c(-0.001), 
+                                    c('orange', 'greenyellow' )),
+    fontWeight = 'bold')
+
 
 # Guardar bases
 # saveRDS(viv_cen_pre, file = "out/Preprocesamiento_bases/viv_cen_pre.rds")
